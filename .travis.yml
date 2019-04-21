@@ -1,12 +1,11 @@
-
 #language: node_js
 #    node_js:
 #      - "11.14.0"
-dist: xenial
-    language: python
-    python:
-      - "3.7"
-    install:
-      - pip install -r requirements.txt
-    script:
-      - python client.py
+#dist: xenial
+language: python
+python:
+  - "3.7"
+install:
+  - pip install -r requirements.txt
+script:
+  - python client.py
