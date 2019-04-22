@@ -170,7 +170,7 @@ async def main():
   await client.connect()
   if not (await client.is_user_authorized()):
     await client.send_code_request(os.environ['phone_number']) #should i wrap with func and then await???
-    myself = await client.sign_in(os.environ['phone_number'], client.get_messages('Telegram')[0].message[12:17])
+    myself = (await client.sign_in(os.environ['phone_number'], client.get_messages('Telegram')[0].message[12:17]))
   await client.run_until_disconnected()
   # msgs = client.get_messages('Telegram')
 
