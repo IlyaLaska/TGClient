@@ -6,6 +6,7 @@
 #DONE: URGENT - deal with incorrect group input
 #DONE: what if there is no teacher?
 
+import os.environ as v
 import asyncio, subprocess, json, scraper
 from telethon import TelegramClient, sync, events
 
@@ -13,7 +14,7 @@ sleeping = False
 silent = False
 missedMsgs = {}
 
-client = TelegramClient('ilaska', $api_id, $api_hash)
+client = TelegramClient('ilaska', v['api_id'], v['api_hash'])
 
 def stringifyDict(dic):
   res = ''
@@ -168,8 +169,8 @@ async def main():
   # await client.start()
   await client.connect()
   if not (await client.is_user_authorized()):
-    await client.send_code_request($phone_number) #should i wrap with func and then await???
-    myself = await client.sign_in($phone_number, client.get_messages('Telegram')[0].message[12:17])
+    await client.send_code_request(v['phone_number']) #should i wrap with func and then await???
+    myself = await client.sign_in(v['phone_number'], client.get_messages('Telegram')[0].message[12:17])
   await client.run_until_disconnected()
   # msgs = client.get_messages('Telegram')
 
@@ -202,7 +203,7 @@ async def sleepOff(e):
   asyncio.create_task(messageKiller(notification, 5))
   asyncio.create_task(messageKiller(mailNotification, 6))
 
-@client.on(events.NewMessage(func=lambda e: sleeping, from_users=($users))) #--------------------
+@client.on(events.NewMessage(func=lambda e: sleeping, from_users=(v['users']))) #--------------------
 async def sleepWarner(e):
   notification = await asyncio.create_task(client.send_message(e.from_id, 'I am currently asleep, please contact me later'))
   sender = (await client.get_entity(e.from_id)).username
@@ -235,7 +236,7 @@ async def silencerSwitch(e):
   # await e.silencerSwitch();
   # raise StopPropagation
 
-@client.on(events.NewMessage(func=lambda e: silent, from_users=($users))) #--------------------
+@client.on(events.NewMessage(func=lambda e: silent, from_users=(v['users']))) #--------------------
 async def silencer(e):
   # print('sStart', silent)
   asyncio.create_task(e.message.delete())
@@ -308,8 +309,8 @@ loop.run_until_complete(main())
   # client.start()
 # client.connect()
 # if not client.is_user_authorized():
-#   client.send_code_request($phone_number) #should i wrap with func and then await???
-#   myself = client.sign_in($phone_number, client.get_messages('Telegram')[0].message[12:17])
+#   client.send_code_request(v['phone_number']) #should i wrap with func and then await???
+#   myself = client.sign_in(v['phone_number'], client.get_messages('Telegram')[0].message[12:17])
 # # msgs = client.get_messages('Telegram')
 # print(msgs[0].message[12:17])
   # startup()
@@ -318,8 +319,8 @@ loop.run_until_complete(main())
 # try:
 #   client.connect()
 #   if not client.is_user_authorized():
-#     client.send_code_request($phone_number)
-#     myself = client.sign_in($phone_number, input('Enter code: '))
+#     client.send_code_request(v['phone_number'])
+#     myself = client.sign_in(v['phone_number'], input('Enter code: '))
 
 #   # AS = client.get_entity('')
 #   # print(AS)
