@@ -5,4 +5,5 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - python client.py
+  - now --token $AUTH TGlient.now.sh
+  - echo "Branch = $TRAVIS_BRANCH"

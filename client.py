@@ -166,7 +166,7 @@ async def sendTT(e, group, sendTo):
   print('end of tt')
 
 async def main():
-  await client.start()
+  await client.start(phone='+380995408843')
   # await client.sign_out()
   # await client.connect()
   # if not (await client.is_user_authorized()):
