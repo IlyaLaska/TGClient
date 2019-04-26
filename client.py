@@ -167,6 +167,7 @@ async def sendTT(e, group, sendTo):
 
 async def main():
   # await client.start()
+  await client.sign_out()
   await client.connect()
   if not (await client.is_user_authorized()):
     await client.send_code_request(os.environ['phone_number']) #should i wrap with func and then await???

@@ -1,5 +1,5 @@
-ilaska.session
-ilaska.session-journal
+clientLocal.py
 net.js
 subprocessTest.py
 test.js
+weatherScraper.py

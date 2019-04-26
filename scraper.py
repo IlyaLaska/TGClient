@@ -38,58 +38,45 @@ def getInputFields(soup, group):
         inputFields[field['name']] = ''
   return inputFields
 
-# for table in tablesList:#for each week
-#   table = table.find_all('tr')#got list of rows - 1-5 lesson for each table
-#   del table[0]
-#   for lesTime in table:#for each row
-#     DotWeekList = lesTime.find_all('td')#got list of days - mon-sat for each row(lessonTime)
-#     del DotWeekList[0]
-#     for DotWeek in DotWeekList:#for each day
-#       # print(DotWeek)
-#       links = DotWeek.find_all('a')#can be empty or contain several links
-#       # print(links)
-#       DotWeek = {}
-#       if links:#if at least smth
-#         DotWeek[links[0]['title']] = links[0]['href'].replace(' ', '_')#P.E. dealt with
-#         if len(links) > 1:#not P.E.
-#           for pos in range(len(links)-2):#wil work once for each teacher present
-#             DotWeek[links[pos+1]['title']] = 'http://rozklad.kpi.ua' + links[pos+1]['href'].replace(' ', '')#replace just in case
-#         DotWeek[links[len(links)-1].text] = links[len(links)-1]['href'].replace(' ', '')#Auditorium always last
-#       # print(DotWeek)
-#     print(DotWeekList)
-#     print('--------------------------------------------------')
-#   # print(len(lesTime))
-
 def sortDotWeekOut(DotWeek):
-  # print(DotWeek)
   links = DotWeek.find_all('a')#can be empty or contain several links
-  # print(links)
   DotWeek = {}
   if links:#if at least smth
     DotWeek[links[0]['title']] = links[0]['href'].replace(' ', '_').replace(')', '%29')#P.E. dealt with
     if len(links) > 1:#not P.E.
-      for pos in range(len(links)-2):#wil work once for each teacher present
+      for pos in range(len(links)-2):#wil work once for each teacher present, leaving the last link untouched
         DotWeek[links[pos+1]['title']] = 'http://rozklad.kpi.ua' + links[pos+1]['href'].replace(' ', '')#replace just in case
-      DotWeek[links[len(links)-1].text] = links[len(links)-1]['href'].replace(' ', '')#Auditorium always last
-  # print(DotWeek)
+      nums = [True for x in links[len(links)-1].text if x.isdigit()] #if last link has numbers - it is an auditorium, else - another teacher
+      if nums: #if last link is an auditorium
+        DotWeek[links[len(links)-1].text] = links[len(links)-1]['href'].replace(' ', '')#Auditorium always last
+      else:
+        DotWeek[links[len(links)-1]['title']] = 'http://rozklad.kpi.ua' + links[len(links)-1]['href'].replace(' ', '')#replace just in case
   return DotWeek
 
 def sortLesTimeOut(lesTime):
   DotWeekList = lesTime.find_all('td')#got list of days - mon-sat for each row(lessonTime)
   del DotWeekList[0]
   DotWeekList = list(map(sortDotWeekOut, DotWeekList))#for each day
-  # for DotWeek in DotWeekList:#for each day
-
-  # print(DotWeekList)
-  # print('--------------------------------------------------')
   return DotWeekList
 
 def sortTableOut(table):
   table = table.find_all('tr')#got list of rows - 1-5 lesson for each table
   del table[0]
   table = list(map(sortLesTimeOut, table))#for each row
-  # for lesTime in table:#for each row
   return table
+
+def getTT(group):
+  mainPage = postUrl(defUrl + mainPageUrl, '') #check if None
+  soup = BeautifulSoup(mainPage, 'html.parser')
+  formDest = defUrl + soup.form['action']
+  inputFields = getInputFields(soup, group)
+  response = postUrl(formDest, inputFields)
+  responseSoup = BeautifulSoup(response, 'html.parser')
+  tablesList = responseSoup.find_all('table')#array of two weeks
+  tablesList = list(map(sortTableOut, tablesList))#for each week
+  tablesList = tablesList[0] + tablesList[1]
+  return tablesList
+
 
 # Subject, Teacher  , Auditorium
 # Always , Sometimes, Often(Not on P.E.)
@@ -106,20 +93,8 @@ def sortTableOut(table):
 #             teacher: '',
 #             classroomLink: '',
 #             classroom: '',
-#         };
+#         }
 
-
-def getTT(group):
-  mainPage = postUrl(defUrl + mainPageUrl, '') #check if None
-  soup = BeautifulSoup(mainPage, 'html.parser')
-  formDest = defUrl + soup.form['action']
-  inputFields = getInputFields(soup, group)
-  response = postUrl(formDest, inputFields)
-  responseSoup = BeautifulSoup(response, 'html.parser')
-  tablesList = responseSoup.find_all('table')#array of two weeks
-  tablesList = list(map(sortTableOut, tablesList))#for each week
-  tablesList = tablesList[0] + tablesList[1]
-  return tablesList
 
 # a = getTT('іп-71')
 # print(a)
