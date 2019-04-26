@@ -204,7 +204,7 @@ async def sleepOff(e):
   asyncio.create_task(messageKiller(notification, 5))
   asyncio.create_task(messageKiller(mailNotification, 6))
 
-@client.on(events.NewMessage(func=lambda e: sleeping, from_users=(os.environ['users']))) #--------------------
+@client.on(events.NewMessage(func=lambda e: sleeping, from_users=('me'))) #--------------------
 async def sleepWarner(e):
   notification = await asyncio.create_task(client.send_message(e.from_id, 'I am currently asleep, please contact me later'))
   sender = (await client.get_entity(e.from_id)).username
@@ -237,7 +237,7 @@ async def silencerSwitch(e):
   # await e.silencerSwitch();
   # raise StopPropagation
 
-@client.on(events.NewMessage(func=lambda e: silent, from_users=(os.environ['users']))) #--------------------
+@client.on(events.NewMessage(func=lambda e: silent, from_users=('me'))) #--------------------
 async def silencer(e):
   # print('sStart', silent)
   asyncio.create_task(e.message.delete())
