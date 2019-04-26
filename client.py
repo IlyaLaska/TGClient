@@ -9,12 +9,13 @@
 import os
 import asyncio, subprocess, json, scraper
 from telethon import TelegramClient, sync, events
+from telethon.sessions import StringSession
 
 sleeping = False
 silent = False
 missedMsgs = {}
 
-client = TelegramClient('ilaska', os.environ['api_id'], os.environ['api_hash'])
+client = TelegramClient(StringSession(os.environ['session']), os.environ['api_id'], os.environ['api_hash'])
 
 def stringifyDict(dic):
   res = ''
@@ -166,8 +167,8 @@ async def sendTT(e, group, sendTo):
   print('end of tt')
 
 async def main():
-  await client.start(phone='+380995408843')
-  # await client.sign_out()
+  await client.start(phone=os.environ['phone_number'])
+  # await client.log_out()
   # await client.connect()
   # if not (await client.is_user_authorized()):
   #   await client.send_code_request(os.environ['phone_number']) #should i wrap with func and then await???
