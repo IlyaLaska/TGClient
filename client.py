@@ -15,6 +15,8 @@ sleeping = False
 silent = False
 missedMsgs = {}
 
+print('Hellooooo')
+
 client = TelegramClient(StringSession(os.environ['session']), os.environ['api_id'], os.environ['api_hash'])
 
 def stringifyDict(dic):
@@ -93,62 +95,27 @@ async def sendJSTT(e, group, sendTo):
   await client.send_message(sendTo, week2TT, link_preview=False)
   print('end of tt')
 
-async def sendTT(e, group, sendTo):
-  # res = subprocess.check_output(["node", "net.js", group])
-  # print('Got reply from JS')
-  # jsonText = res.decode('utf8')
-  # globalList = json.loads(jsonText)
-  globalList = scraper.getTT(group)
-  if globalList:
-    asyncio.create_task(client.send_message(sendTo, '**Timetable for ' + group + ':**'))
-  else:
-    asyncio.create_task(client.send_message(sendTo, 'failed to get timetable for group ' + group + '. Please check your input'))
-  asyncio.create_task(e.message.delete())
-  print('Got doc')
+def parseWeek(globalList, weekPos):#weekPos 1 or 2
   dayOTWeek = 0
   days = ['**Monday:**\n', '**Tuesday:**\n', '**Wednesday:**\n', '**Thursday:**\n', '**Friday:**\n', '**Saturday:**\n']
   week = ['', '', '', '', '', '']
-  week2 = []
-  week1TT = '**WEEK 1:**\n'
-  week2TT = '**WEEK 2:**\n'
+  weekTT = '**WEEK ' + str(weekPos) + ':**\n'
   for lisI in range(len(globalList)):
-    # print(globalList[0])
-    if lisI == 5:
-      # print('LISTS SWAP')
-      # print(week)
-      week2  = week.copy()
-      # print(week2)
-      week = ['', '', '', '', '', '']
+    if weekPos == 1: #first week
+      if lisI == 5:
+        break
+    elif weekPos == 2: #second week
+      if lisI < 5:
+        continue
     for lesssonDict in globalList[lisI]:
       if dayOTWeek == 6:
         dayOTWeek = 0
-      # print(lesssonDict)
       lesson = ''
       lessonValues = []
       [lessonValues.extend([k,v]) for (k, v) in lesssonDict.items()]
       for i in range(len(lessonValues)):
         if not (i % 2):#0, 2, 4...
           lesson += ('[' + lessonValues[i] + '](' + lessonValues[i+1] + ')\n')
-
-                                # lessonValues = list(lesssonDict.values())
-                                # # print(lessonValues)
-                                # for i in range(len(lessonValues)): #link first
-                                #   # print(i)
-                                #   if (i % 2): #remainder == 1 - useful lessonValues
-                                #     # print('remainder')
-                                #     if lessonValues[i-1]: #link exists
-                                #       # print('I: ')
-                                #       # print(i)
-                                #       lesson += ('[' + lessonValues[i] + '](' + lessonValues[i-1] + ')\n')
-                                #     elif lessonValues[i]:
-                                #       # print('elif')
-                                #       # print(lessonValues[i])
-                                #       lesson += (lessonValues[i] + '\n')
-      #     print('end of remainder')
-      #   print('lesson so far')
-      #   print(lesson)
-      # print('lesson:')
-      # print(lesson)
       if lesson:
         # week[dayOTWeek] += lesson
         les = lisI-5 if lisI >= 5 else lisI
@@ -156,15 +123,24 @@ async def sendTT(e, group, sendTo):
       dayOTWeek += 1
   
   for i in range(len(days)):
-    week1TT += days[i]
-    week1TT += week2[i]
-  
-  for i in range(len(days)):
-    week2TT += days[i]
-    week2TT += week[i]
+    weekTT += days[i]
+    weekTT += week[i]
+  return weekTT
+
+async def sendTT(e, group, sendTo):
+  globalList = scraper.getTT(group)
+  if globalList:
+    asyncio.create_task(client.send_message(sendTo, '**Timetable for ' + group + ':**'))
+  else:
+    asyncio.create_task(client.send_message(sendTo, 'failed to get timetable for group ' + group + '. Please check your input'))
+  asyncio.create_task(e.message.delete())
+  print('Got doc')
+  week1TT = parseWeek(globalList, 1)
+  week2TT = parseWeek(globalList, 2)
   await client.send_message(sendTo, week1TT, link_preview=False)
   await client.send_message(sendTo, week2TT, link_preview=False)
   print('end of tt')
+
 
 async def main():
   await client.start(phone=os.environ['phone_number'])
